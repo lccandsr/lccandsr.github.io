@@ -206,8 +206,8 @@
         <img src="images/gallery/1.png" alt="我们的回忆"></img>
         <img src="images/gallery/2.jpg" alt="美好时光"></img>
         <img src="images/gallery/42.jpg" alt="美好时光">
-        <img src="images/gallery/42.jpg" alt="美好时光">
-        <img src="images/gallery/43.jpg" alt="幸福瞬间">
+        <img src="images/gallery/43.jpg" alt="美好时光">
+        <img src="images/gallery/3.jpg" alt="幸福瞬间">
         <img src="images/gallery/4.jpg" alt="甜蜜时刻">
         <img src="images/gallery/5.jpg" alt="甜蜜时刻">
         <img src="images/gallery/6.jpg" alt="甜蜜时刻">
@@ -346,23 +346,6 @@
 </style>
 
 <script>
-// 音乐随机播放功能
-const musicList = [
-    'music/yuai.mp3',
-    'music/yuai.mp3',
-    'music/yuai.mp3',
-    'music/yuai.mp3'
-];
-
-document.addEventListener('click', function() {
-    const audio = document.querySelector('audio');
-    if (audio.paused) {
-        const randomMusic = musicList[Math.floor(Math.random() * musicList.length)];
-        audio.src = randomMusic;
-        audio.play();
-        document.body.classList.add('music-playing');
-    }
-});
 
 // 照片墙自动轮播增强
 function initPhotoWall() {
