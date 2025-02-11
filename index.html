@@ -1,221 +1,399 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
-    <title>爱的纪念语</title>
-    <link rel="shortcut icon" href=" media/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="css/style.css">
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type="text/javascript" src="js/jscex.js"></script>
-    <script type="text/javascript" src="js/jscex-parser.js"></script>
-    <script type="text/javascript" src="js/jscex-jit.js"></script>
-    <script type="text/javascript" src="js/jscex-builderbase.js"></script>
-    <script type="text/javascript" src="js/jscex-async.js"></script>
-    <script type="text/javascript" src="js/jscex-async-powerpack.js"></script>
-    <script type="text/javascript" src="js/functions.js" charset="utf-8"></script>
-    <script type="text/javascript" src="js/love.js" charset="utf-8"></script>
-    <script type="text/javascript">
-        window.onload = function(){
-                 setInterval("toggleSound()",1);
-            }
-    
-        function toggleSound() {
-                    var music = document.getElementById("music");//获取ID  
-                    if (music.paused) { //判读是否播放  
-                        music.paused=false;
-                        music.play(); //没有就播放 
-                    }    
-            }
-    </script>
-    
-    <style type="text/css">
-        <!--.STYLE1 {color: #666666}-->
-    </style>
-</head>
-<body>
-<audio autoplay="autoplay" loop="loop" id="music"><source src="media/bgm.flac" type="audio/mp3"></audio>
-<div id="main">
-    <div id="error">HZM告诉你吆:本页面采用HTML5编辑，目前您的浏览器无法显示，请换成谷歌或者火狐浏览器，或者其他游览器的最新版本。</div>
-    <!--HZM告诉你吆：以下文字和字体颜色可自定义-->
-    <div id="wrap">
-        <div id="text">
-            <div id="code">
-                <span class="say"><font color="FFE750">你是谁啊</font></span><br>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>lcc❤sr</title>
+		<script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.12.4/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+		<script src="https://www.layuicdn.com/layui/layui.js"></script>
+		<script type="text/javascript" src="canvas_bg.js"></script>
+		<style>
+			* {
+				cursor: pointer;
+			}
+
+			body {
+				background-color: beige;
+			}
+
+			#div1 {
+				text-align: center;
+				position: relative;
+				top: 55px;
+			}
+
+			.loveName {
+				color: red;
+				font-weight: bold;
+				font-size: 55px;
+				height: 120px;
+			}
+
+			.lTime {
+				/* width: 35%; */
+				margin: 0 auto;
+				text-align: center;
+				font-size: 30px;
+				color: #0FCECE;
+			}
+
+			#author {
+				position: absolute;
+				left: 75%;
+				top: 75%;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="c" style="position: absolute;z-index: -1;text-align: center;top: -20px;left: -20px;"></canvas>
+		<div id="div1">
+			<div class="loveName">梁小闯👦❤佘小蕊👧</div>
+		</div>
+        <button class="musicBtn  ">
+            <i class="layui-icon layui-icon-headset layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 28px;position: fixed;left: 51px;top: 100px;"></i>
+        </button>
+        <audio autoplay="autoplay" loop class="audio1">
+            <source src="./music/qianshou.mp3" type="audio/mpeg">
+        </audio>
+        <script>
+            const musicBtn = document.querySelector('.musicBtn');
+            const audio = document.querySelector('.audio1');
+            musicBtn.addEventListener('click', function () {
+                if (audio.paused) {
+                    audio.play();
+                } else {
+                    audio.pause();
+                }
+            });
+        </script>
+
+		<!-- 在原有body结束前添加以下代码 -->
+        <!-- 在body标签内添加以下内容 -->
+        <div class="love-clock">
+            <div class="clock-title">憨宝宝，距离我们在一起2024年10月26日00:14已经共同走过</div>
+            <div class="time-container">
+                <div class="time-block">
+                    <span class="number" id="loveDays">0</span>
+                    <span class="label">天</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveHours">0</span>
+                    <span class="label">小时</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveMinutes">0</span>
+                    <span class="label">分钟</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveSeconds">0</span>
+                    <span class="label">秒</span>
+                </div>
+            </div>
+            <div class="memory-moment">
+                我们的故事开始于2024年9月9日 18:35 <br>
             </div>
         </div>
-        <div id="clock-box">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;闯闯
-        <span class="STYLE1">与</span>凤凤<span class="STYLE1">已经相识了</span><div id="clock"></div>
-        </div>
-        <canvas color="ff4f00" id="canvas" width="1100" height="1100"></canvas>
-    </div>
-
+        
+        <style>
+        /* 添加在原有style中 */
+        .love-clock {
+            position: relative;
+            margin: 100px auto;
+            padding: 30px;
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,100,100,0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+        
+        .clock-title {
+            font-size: 28px;
+            color: #750002;
+            text-shadow: 2px 2px 4px rgba(255,50,50,0.8);
+            margin-bottom: 25px;
+            font-family: '楷体', cursive;
+        }
+        
+        .time-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .time-block {
+            position: relative;
+            min-width: 120px;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(255,50,50,0.3);
+        }
+        
+        .number {
+            display: block;
+            font-size: 48px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+        
+        .label {
+            font-size: 18px;
+            color: rgba(2, 48, 51, 0.9);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .memory-moment {
+            margin-top: 25px;
+            font-size: 20px;
+            color: #121212;
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(255,50,50,0.5);
+        }
+        </style>
+        
+        <script>
+        // 添加在原有script中
+        function updateLoveTime() {
+            const startDate = new Date(2024, 9, 26, 0, 14); // 月份从0开始计算
+            const now = new Date();
+            const diff = now - startDate;
+        
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+            // 数字动画效果
+            animateNumber('loveDays', days);
+            animateNumber('loveHours', hours);
+            animateNumber('loveMinutes', minutes);
+            animateNumber('loveSeconds', seconds);
+        }
+        
+        function animateNumber(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const current = parseInt(element.innerText) || 0;
+            if (current === newValue) return;
+            
+            element.style.transform = 'scale(1.2)';
+            element.style.color = '#ffeb3b';
+            setTimeout(() => {
+                element.innerText = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.color = '#fff';
+            }, 200);
+        }
+        
+        // 每秒更新时间
+        setInterval(updateLoveTime, 1000);
+        updateLoveTime(); // 立即执行一次
+        </script>
+<div class="couple-animation">
+    <div class="boy"></div>
+    <div class="heart"></div>
+    <div class="girl"></div>
 </div>
 
-<script>
-</script>
+<div class="photo-wall">
+    <div class="photos">
+        <img src="images/gallery/1.png" alt="我们的回忆"></img>
+        <img src="images/gallery/2.jpg" alt="美好时光"></img>
+        <img src="images/gallery/42.jpg" alt="美好时光">
+        <img src="images/gallery/42.jpg" alt="美好时光">
+        <img src="images/gallery/43.jpg" alt="幸福瞬间">
+        <img src="images/gallery/4.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/5.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/6.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/7.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/8.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/9.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/10.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/11.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/12.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/13.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/14.jpg" alt="幸福瞬间">
+        <img src="images/gallery/15.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/16.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/17.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/18.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/19.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/20.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/21.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/22.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/23.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/24.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/25.jpg" alt="幸福瞬间">
+        <img src="images/gallery/26.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/27.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/28.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/29.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/30.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/31.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/32.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/33.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/34.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/35.jpg" alt="幸福瞬间">
+        <img src="images/gallery/36.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/37.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/38.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/39.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/40.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/41.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/42.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/43.jpg" alt="甜蜜时刻">
+    </div>
+</div>
+
+<style>
+/* 新增样式 */
+/* 情侣动画 */
+.couple-animation {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+}
+
+.boy, .girl {
+    width: 80px;
+    height: 120px;
+    background-size: contain;
+    animation: float 3s ease-in-out infinite;
+}
+
+.boy {
+    background: url('images/boy.png') no-repeat;
+    animation-delay: 0.2s;
+}
+
+.girl {
+    background: url('images/girl.png') no-repeat;
+    animation-delay: 0.5s;
+}
+
+.heart {
+    width: 40px;
+    height: 40px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff3366" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+    animation: heartbeat 1.2s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+
+/* 照片墙 */
+.photo-wall {
+    position: relative;
+    margin: 50px auto;
+    width: 80%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(255,50,50,0.2);
+}
+
+.photos {
+    display: flex;
+    width: 400%;
+    height: 100%;
+    animation: slide 20s infinite;
+}
+
+.photos:hover {
+    animation-play-state: paused;
+}
+
+.photos img {
+    width: 25%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.photos img:hover {
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+@keyframes slide {
+    0%, 20% { transform: translateX(0); }
+    25%, 45% { transform: translateX(-25%); }
+    50%, 70% { transform: translateX(-50%); }
+    75%, 95% { transform: translateX(-75%); }
+    100% { transform: translateX(0); }
+}
+</style>
 
 <script>
-    (function(){
-        var canvas = $('#canvas');
+// 音乐随机播放功能
+const musicList = [
+    'music/yuai.mp3',
+    'music/yuai.mp3',
+    'music/yuai.mp3',
+    'music/yuai.mp3'
+];
 
-        if (!canvas[0].getContext) {
-            $("#error").show();
-            return false;
-        }
+document.addEventListener('click', function() {
+    const audio = document.querySelector('audio');
+    if (audio.paused) {
+        const randomMusic = musicList[Math.floor(Math.random() * musicList.length)];
+        audio.src = randomMusic;
+        audio.play();
+        document.body.classList.add('music-playing');
+    }
+});
 
-        var width = canvas.width();
-        var height = canvas.height();
+// 照片墙自动轮播增强
+function initPhotoWall() {
+    const photos = document.querySelector('.photos');
+    let clone = photos.cloneNode(true);
+    photos.parentNode.appendChild(clone);
+    photos.style.width = '200%';
+}
 
-        canvas.attr("width", width);
-        canvas.attr("height", height);
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+    initPhotoWall();
+    
+    // 情侣动画交互
+    document.querySelector('.couple-animation').addEventListener('click', () => {
+        document.querySelector('.heart').style.animation = 'heartExplosion 0.8s';
+        setTimeout(() => {
+            document.querySelector('.heart').style.animation = 'heartbeat 1.2s infinite';
+        }, 800);
+    });
+});
 
-        var opts = {
-            seed: {
-                x: width / 2 - 20,
-                color: "rgb(190, 26, 37)",
-                scale: 2
-            },
-            branch: [
-                [535, 680, 570, 250, 500, 200, 30, 100, [
-                    [540, 500, 455, 417, 340, 400, 13, 100, [
-                        [450, 435, 434, 430, 394, 395, 2, 40]
-                    ]],
-                    [550, 445, 600, 356, 680, 345, 12, 100, [
-                        [578, 400, 648, 409, 661, 426, 3, 80]
-                    ]],
-                    [539, 281, 537, 248, 534, 217, 3, 40],
-                    [546, 397, 413, 247, 328, 244, 9, 80, [
-                        [427, 286, 383, 253, 371, 205, 2, 40],
-                        [498, 345, 435, 315, 395, 330, 4, 60]
-                    ]],
-                    [546, 357, 608, 252, 678, 221, 6, 100, [
-                        [590, 293, 646, 277, 648, 271, 2, 80]
-                    ]]
-                ]]
-            ],
-            bloom: {
-                num: 700,
-                width: 1080,
-                height: 650
-            },
-            footer: {
-                width: 1200,
-                height: 5,
-                speed: 10
-            }
-        };
-
-        var tree = new Tree(canvas[0], width, height, opts);
-        var seed = tree.seed;
-        var foot = tree.footer;
-        var hold = 1;
-
-        canvas.click(function(e) {
-            var offset = canvas.offset(), x, y;
-            x = e.pageX - offset.left;
-            y = e.pageY - offset.top;
-            if (seed.hover(x, y)) {
-                hold = 0;
-                canvas.unbind("click");
-                canvas.unbind("mousemove");
-                canvas.removeClass('hand');
-            }
-        }).mousemove(function(e){
-            var offset = canvas.offset(), x, y;
-            x = e.pageX - offset.left;
-            y = e.pageY - offset.top;
-            canvas.toggleClass('hand', seed.hover(x, y));
-        });
-
-        var seedAnimate = eval(Jscex.compile("async", function () {
-            seed.draw();
-            while (hold) {
-                $await(Jscex.Async.sleep(10));
-            }
-            while (seed.canScale()) {
-                seed.scale(0.95);
-                $await(Jscex.Async.sleep(10));
-            }
-            while (seed.canMove()) {
-                seed.move(0, 2);
-                foot.draw();
-                $await(Jscex.Async.sleep(10));
-            }
-        }));
-
-        var growAnimate = eval(Jscex.compile("async", function () {
-            do {
-                tree.grow();
-                $await(Jscex.Async.sleep(10));
-            } while (tree.canGrow());
-        }));
-
-        var flowAnimate = eval(Jscex.compile("async", function () {
-            do {
-                tree.flower(2);
-                $await(Jscex.Async.sleep(10));
-            } while (tree.canFlower());
-        }));
-
-        var moveAnimate = eval(Jscex.compile("async", function () {
-            tree.snapshot("p1", 240, 0, 610, 680);
-            while (tree.move("p1", 500, 0)) {
-                foot.draw();
-                $await(Jscex.Async.sleep(10));
-            }
-            foot.draw();
-            tree.snapshot("p2", 500, 0, 610, 680);
-
-            // 会有闪烁不得意这样做, (＞﹏＜)
-            canvas.parent().css("background", "url(" + tree.toDataURL('image/png') + ")");
-            canvas.css("background", "#ffe");
-            $await(Jscex.Async.sleep(300));
-            canvas.css("background", "none");
-        }));
-
-        var jumpAnimate = eval(Jscex.compile("async", function () {
-            var ctx = tree.ctx;
-            while (true) {
-                tree.ctx.clearRect(0, 0, width, height);
-                tree.jump();
-                foot.draw();
-                $await(Jscex.Async.sleep(25));
-            }
-        }));
-
-        var textAnimate = eval(Jscex.compile("async", function () {
-            var together = new Date();
-            together.setFullYear(2023, 10, -27); 	//时间年月日 注：此处修改的话是倒计时算，04,-23代表4月7日，如果是5月8日则05，22
-            together.setHours(23);					//小时
-            together.setMinutes(54);					//分钟
-            together.setSeconds(0);					//秒前一位
-            together.setMilliseconds(0);			//秒第二位
-
-            $("#code").show().typewriter();
-            $("#clock-box").fadeIn(500);
-            while (true) {
-                timeElapse(together);
-                $await(Jscex.Async.sleep(1000));
-            }
-        }));
-
-        var runAsync = eval(Jscex.compile("async", function () {
-            $await(seedAnimate());
-            $await(growAnimate());
-            $await(flowAnimate());
-            $await(moveAnimate());
-
-            textAnimate().start();
-
-            $await(jumpAnimate());
-        }));
-
-        runAsync().start();
-    })();
+// 新增心跳爆炸动画
+const style = document.createElement('style');
+style.textContent = `
+@keyframes heartExplosion {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(5); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
 </script>
-<!-- 注：添加下列HTML 5鼠标随动特效后在Mac平台浏览时会闪烁异常 -->
-<script type='text/javascript' color='102,185,255' zIndex='-10' opacity='50' count='99' src='js/canvas-nest.min.js'></script>
-<!-- 如果你有强迫症的话可以直接注释掉canvas-nest.min.js就不会在Mac上闪烁了 Win和Linux没问题 -->
-</body>
+	</body>
 </html>

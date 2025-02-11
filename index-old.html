@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>lcc❤sr</title>
+		<script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.12.4/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+		<script src="https://www.layuicdn.com/layui/layui.js"></script>
+		<script type="text/javascript" src="canvas_bg.js"></script>
+		<style>
+			* {
+				cursor: pointer;
+			}
+
+			body {
+				background-color: beige;
+			}
+
+			#div1 {
+				text-align: center;
+				position: relative;
+				top: 55px;
+			}
+
+			.loveName {
+				color: red;
+				font-weight: bold;
+				font-size: 55px;
+				height: 120px;
+			}
+
+			.lTime {
+				/* width: 35%; */
+				margin: 0 auto;
+				text-align: center;
+				font-size: 30px;
+				color: #0FCECE;
+			}
+
+			#author {
+				position: absolute;
+				left: 75%;
+				top: 75%;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="c" style="position: absolute;z-index: -1;text-align: center;top: -20px;left: -20px;"></canvas>
+		<div id="div1">
+			<div class="loveName">梁小闯👦❤佘小蕊👧</div>
+			<div id="loveTime" class="loveTime">
+				<div id="sTime" class="lTime"></div><br />
+				<div id="nTime" class="lTime"></div><br />
+				<div id="dDays" class="lTime"></div><br />
+				<div id="dHour" class="lTime"></div><br />
+				<div id="dMinutes" class="lTime"></div><br />
+			</div>
+		</div>
+
+        <button class="musicBtn  ">
+            <i class="layui-icon layui-icon-headset layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 28px;position: fixed;left: 51px;top: 100px;"></i>
+        </button>
+        <audio autoplay="autoplay" loop class="audio1">
+            <source src="./music/yuai.mp3" type="audio/mpeg">
+        </audio>
+        <script>
+            const musicBtn = document.querySelector('.musicBtn');
+            const audio = document.querySelector('.audio1');
+            musicBtn.addEventListener('click', function () {
+                if (audio.paused) {
+                    audio.play();
+                } else {
+                    audio.pause();
+                }
+            });
+        </script>
+
+		<!-- 在原有body结束前添加以下代码 -->
+<div class="love-clock">
+    <div class="clock-title">憨宝宝，距离我们在一起2024年10月26日00:14已经共同走过</div>
+    <div class="time-container">
+        <div class="time-block">
+            <span class="number" id="loveDays">0</span>
+            <span class="label">天</span>
+        </div>
+        <div class="time-block">
+            <span class="number" id="loveHours">0</span>
+            <span class="label">小时</span>
+        </div>
+        <div class="time-block">
+            <span class="number" id="loveMinutes">0</span>
+            <span class="label">分钟</span>
+        </div>
+        <div class="time-block">
+            <span class="number" id="loveSeconds">0</span>
+            <span class="label">秒</span>
+        </div>
+    </div>
+    <div class="memory-moment">
+        我们的故事开始于2024年9月9日 18:35 <br>
+    </div>
+</div>
+
+<style>
+/* 添加在原有style中 */
+.love-clock {
+    position: relative;
+    margin: 100px auto;
+    padding: 30px;
+    max-width: 800px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(255,100,100,0.3);
+    backdrop-filter: blur(5px);
+    text-align: center;
+}
+
+.clock-title {
+    font-size: 28px;
+    color: #750002;
+    text-shadow: 2px 2px 4px rgba(255,50,50,0.8);
+    margin-bottom: 25px;
+    font-family: '楷体', cursive;
+}
+
+.time-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.time-block {
+    position: relative;
+    min-width: 120px;
+    padding: 15px;
+    background: linear-gradient(45deg, #ff3366, #ff6699);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(255,50,50,0.3);
+}
+
+.number {
+    display: block;
+    font-size: 48px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+}
+
+.label {
+    font-size: 18px;
+    color: rgba(2, 48, 51, 0.9);
+    display: block;
+    margin-top: 5px;
+}
+
+.memory-moment {
+    margin-top: 25px;
+    font-size: 20px;
+    color: #121212;
+    line-height: 1.5;
+    text-shadow: 1px 1px 2px rgba(255,50,50,0.5);
+}
+</style>
+
+<script>
+// 添加在原有script中
+function updateLoveTime() {
+    const startDate = new Date(2024, 9, 26, 0, 14); // 月份从0开始计算
+    const now = new Date();
+    const diff = now - startDate;
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    // 数字动画效果
+    animateNumber('loveDays', days);
+    animateNumber('loveHours', hours);
+    animateNumber('loveMinutes', minutes);
+    animateNumber('loveSeconds', seconds);
+}
+
+function animateNumber(elementId, newValue) {
+    const element = document.getElementById(elementId);
+    const current = parseInt(element.innerText) || 0;
+    if (current === newValue) return;
+    
+    element.style.transform = 'scale(1.2)';
+    element.style.color = '#ffeb3b';
+    setTimeout(() => {
+        element.innerText = newValue;
+        element.style.transform = 'scale(1)';
+        element.style.color = '#fff';
+    }, 200);
+}
+
+// 每秒更新时间
+setInterval(updateLoveTime, 1000);
+updateLoveTime(); // 立即执行一次
+</script>
+	</body>
+</html>
