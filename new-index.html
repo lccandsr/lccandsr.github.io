@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>lcc❤sr</title>
+    <script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.12.4/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+    <script src="https://www.layuicdn.com/layui/layui.js"></script>
+    <script type="text/javascript" src="canvas_bg.js"></script>
+    <style>
+        * {
+            cursor: pointer;
+        }
+
+        body {
+            background-color: beige;
+            padding-bottom: 100px;
+        }
+
+        #div1 {
+            text-align: center;
+            position: relative;
+            top: 55px;
+        }
+
+        .loveName {
+            color: red;
+            font-weight: bold;
+            font-size: 55px;
+            height: 120px;
+        }
+
+        /* 访问计数器 */
+        .visitor-counter {
+            text-align: center;
+            margin: 50px auto 30px auto;
+            font-size: 24px;
+            color: #750002;
+            text-shadow: 1px 1px 3px rgba(255,50,50,0.5);
+        }
+
+        .counter-number {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin: 0 8px;
+            box-shadow: 0 3px 10px rgba(255,50,50,0.3);
+        }
+
+        /* 爱你的按钮 */
+        .love-button-container {
+            text-align: center;
+            margin: 30px auto;
+            position: relative;
+        }
+
+        #loveButton {
+            background: linear-gradient(45deg, #ff3366, #ff6b9e);
+            border: none;
+            color: white;
+            padding: 15px 50px;
+            font-size: 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(255,50,100,0.4);
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        #loveButton:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(255,50,100,0.5);
+        }
+
+        #loveButton:active {
+            transform: translateY(0);
+        }
+
+        .love-count {
+            margin-top: 15px;
+            font-size: 22px;
+            color: #750002;
+        }
+
+        /* 飘落动画容器 */
+        .falling-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .falling-item {
+            position: absolute;
+            top: -50px;
+            font-size: 24px;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* 弹幕区域 */
+        .danmaku-container {
+            position: relative;
+            width: 90%;
+            height: 150px;
+            margin: 30px auto;
+            overflow: hidden;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .danmaku-item {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 26px;
+            font-weight: bold;
+            color: #ff3366;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            animation: danmakuMove linear forwards;
+        }
+
+        @keyframes danmakuMove {
+            0% {
+                transform: translate(100vw, -50%);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-200%, -50%);
+                opacity: 0.8;
+            }
+        }
+
+        /* 拖尾特效元素 */
+        .trail-item {
+            position: absolute;
+            font-size: 12px;
+            opacity: 0.6;
+            pointer-events: none;
+            animation: trailFade 1s linear forwards;
+        }
+
+        @keyframes trailFade {
+            0% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* 我想说悬浮按钮 */
+        .speak-fab {
+            position: fixed;
+            bottom: 180px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(255,50,100,0.4);
+            z-index: 999;
+            transition: transform 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .speak-fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* 弹窗遮罩 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .speak-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #750002;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .speak-input {
+            width: 100%;
+            height: 120px;
+            border: 2px solid #ffccd5;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .speak-input:focus {
+            border-color: #ff3366;
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border-radius: 20px;
+            border: none;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255,50,100,0.3);
+        }
+
+        /* 瀑布流照片墙 */
+        .masonry {
+            column-count: 3;
+            column-gap: 15px;
+            width: 90%;
+            margin: 50px auto;
+        }
+
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255,50,50,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: white;
+        }
+
+        .masonry-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(255,50,50,0.35);
+        }
+
+        .masonry-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 季节飘落特效容器 */
+        .season-falling-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        .season-falling-item {
+            position: absolute;
+            top: -50px;
+            font-size: 30px;
+            animation: seasonFall linear forwards;
+            opacity: 0.8;
+        }
+
+        @keyframes seasonFall {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(600px) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* 年份切换翻页特效 */
+        .masonry {
+            position: relative;
+            column-count: 3;
+            column-gap: 15px;
+            width: 90%;
+            margin: 50px auto;
+            overflow: hidden;
+        }
+
+        .masonry.fade-turn {
+            animation: pageTurn 0.6s ease-in-out;
+        }
+
+        @keyframes pageTurn {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(-30px);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 年份季节筛选栏 */
+        .filter-bar {
+            position: relative;
+
+            width: 90%;
+            margin: 0 auto;
+            text-align: center;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(255,50,50,0.2);
+        }
+
+        .year-tabs {
+            margin-bottom: 15px;
+        }
+
+        .year-tab {
+            display: inline-block;
+            padding: 8px 25px;
+            margin: 0 5px;
+            font-size: 20px;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.5);
+            color: #750002;
+            transition: all 0.3s;
+        }
+
+        .year-tab.active {
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            color: white;
+            box-shadow: 0 3px 10px rgba(255,50,50,0.3);
+        }
+
+        .year-tab.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .season-buttons {
+            margin-top: 10px;
+        }
+
+        .season-btn {
+            display: inline-block;
+            padding: 6px 20px;
+            margin: 0 4px;
+            font-size: 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.5);
+            color: #750002;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .season-btn.active {
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            color: white;
+            border-color: #ff3366;
+            box-shadow: 0 2px 8px rgba(255,50,50,0.3);
+        }
+
+        .empty-message {
+            text-align: center;
+            font-size: 28px;
+            color: #750002;
+            padding: 100px 20px;
+            font-style: italic;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            .masonry {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .masonry {
+                column-count: 1;
+            }
+            .year-tab {
+                padding: 6px 15px;
+                font-size: 16px;
+            }
+            .season-btn {
+                padding: 4px 12px;
+                font-size: 14px;
+            }
+        }
+
+        .lTime {
+            margin: 0 auto;
+            text-align: center;
+            font-size: 30px;
+            color: #0FCECE;
+        }
+
+        #author {
+            position: absolute;
+            left: 75%;
+            top: 75%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="c" style="position: fixed;z-index: -1;text-align: center;top: 0;left: 0;width: 100%;height: 100%;"></canvas>
+    
+    <!-- 飘落特效容器 -->
+    <div class="falling-container" id="fallingContainer"></div>
+
+    <div id="div1">
+        <div class="loveName">闯闯👦💗小siri👧</div>
+    </div>
+
+    <!-- 弹幕循环区域 -->
+    <div class="danmaku-container" id="danmakuContainer"></div>
+
+    <!-- 访问次数统计 -->
+    <div class="visitor-counter">
+        ❤️ 本页已经被访问了 <span class="counter-number" id="visitorCount">0</span> 次 ❤️
+    </div>
+
+    <!-- 爱你的按钮 -->
+    <div class="love-button-container">
+        <button id="loveButton">💗 爱你 💗</button>
+        <div class="love-count">已经爱了 <span id="loveCount">0</span> 次</div>
+    </div>
+
+    <button class="musicBtn  ">
+        <i class="layui-icon layui-icon-headset layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 28px;position: fixed;left: 51px;top: 100px;"></i>
+    </button>
+    <audio autoplay="autoplay" loop class="audio1">
+        <source src="./music/qianshou.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        const musicBtn = document.querySelector('.musicBtn');
+        const audio = document.querySelector('.audio1');
+        musicBtn.addEventListener('click', function () {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        });
+    </script>
+
+    <!-- 恋爱时间统计 -->
+    <div class="love-clock">
+        <div class="clock-title">憨宝宝，距离我们在一起2024年10月26日00:14已经共同走过</div>
+        <div class="time-container">
+            <div class="time-block">
+                <span class="number" id="loveDays">0</span>
+                <span class="label">天</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="loveHours">0</span>
+                <span class="label">小时</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="loveMinutes">0</span>
+                <span class="label">分钟</span>
+            </div>
+            <div class="time-block">
+                <span class="number" id="loveSeconds">0</span>
+                <span class="label">秒</span>
+            </div>
+        </div>
+        <div class="memory-moment">
+            我们的故事开始于2024年9月9日 18:35 <br>
+        </div>
+    </div>
+    
+    <style>
+        /* 添加在原有style中 */
+        .love-clock {
+            position: relative;
+            margin: 50px auto;
+            padding: 30px;
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,100,100,0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+        
+        .clock-title {
+            font-size: 28px;
+            color: #750002;
+            text-shadow: 2px 2px 4px rgba(255,50,50,0.8);
+            margin-bottom: 25px;
+            font-family: '楷体', cursive;
+        }
+        
+        .time-container {
+            display: flex;
+            justify-content: center;
+            gap: clamp(10px, 3vw, 30px);
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .time-block {
+            position: relative;
+            min-width: clamp(80px, 18vw, 120px);
+            padding: clamp(10px, 2vw, 15px);
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(255,50,50,0.3);
+        }
+        
+        .number {
+            display: block;
+            font-size: clamp(32px, 8vw, 48px);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+        
+        .label {
+            font-size: clamp(14px, 3vw, 18px);
+            color: rgba(2, 48, 51, 0.9);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .memory-moment {
+            margin-top: 25px;
+            font-size: clamp(16px, 3vw, 20px);
+            color: #121212;
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(255,50,50,0.5);
+        }
+        
+        /* 小屏幕进一步适配 */
+        @media (max-width: 600px) {
+            .love-clock {
+                margin: 30px 15px;
+                padding: 20px 15px;
+            }
+            .clock-title {
+                font-size: clamp(20px, 6vw, 28px);
+            }
+        }
+    </style>
+        
+    <script>
+        // 添加在原有script中
+        function updateLoveTime() {
+            const startDate = new Date(2024, 9, 26, 0, 14); // 月份从0开始计算
+            const now = new Date();
+            const diff = now - startDate;
+        
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+            // 数字动画效果
+            animateNumber('loveDays', days);
+            animateNumber('loveHours', hours);
+            animateNumber('loveMinutes', minutes);
+            animateNumber('loveSeconds', seconds);
+        }
+        
+        function animateNumber(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const current = parseInt(element.innerText) || 0;
+            if (current === newValue) return;
+            
+            element.style.transform = 'scale(1.2)';
+            element.style.color = '#ffeb3b';
+            setTimeout(() => {
+                element.innerText = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.color = '#fff';
+            }, 200);
+        }
+        
+        // 每秒更新时间
+        setInterval(updateLoveTime, 1000);
+        updateLoveTime(); // 立即执行一次
+    </script>
+
+<!-- 去掉了底部悬浮情侣爱心 -->
+
+<!-- 年份季节筛选栏 -->
+<div class="filter-bar">
+    <div class="year-tabs" id="yearTabs">
+        <div class="year-tab active" data-year="2025">2025年</div>
+        <div class="year-tab" data-year="2026">2026年</div>
+        <div class="year-tab empty" data-year="2027">2027年 <span>(故事待写...)</span></div>
+    </div>
+    <div class="season-buttons" id="seasonButtons">
+        <div class="season-btn" data-season="spring">春天 🌸</div>
+        <div class="season-btn active" data-season="autumn">秋天 🍂</div>
+        <div class="season-btn" data-season="winter">冬天 ❄️</div>
+        <div class="season-btn" data-season="summer">夏天 🪷</div>
+    </div>
+    <div class="season-falling-container" id="seasonFallingContainer"></div>
+</div>
+
+<!-- 瀑布流照片墙 -->
+<div class="masonry" id="masonryGallery">
+    <!-- 图片将通过 JavaScript 动态插入 -->
+</div>
+
+<!-- 情侣动画 -->
+<div class="couple-animation">
+    <div class="boy"></div>
+    <div class="heart"></div>
+    <div class="girl"></div>
+</div>
+
+<style>
+/* 情侣动画 */
+.couple-animation {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+}
+
+.boy, .girl {
+    width: 80px;
+    height: 120px;
+    background-size: contain;
+    animation: float 3s ease-in-out infinite;
+}
+
+.boy {
+    background: url('images/boy.png') no-repeat;
+    animation-delay: 0.2s;
+}
+
+.girl {
+    background: url('images/girl.png') no-repeat;
+    animation-delay: 0.5s;
+}
+
+.heart {
+    width: 40px;
+    height: 40px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff3366" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+    animation: heartbeat 1.2s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+</style>
+
+<script>
+    // 图片数据 - 从 images.json 加载，内置默认数据
+    let imageData = {
+        "2025": {
+            "spring": [],
+            "summer": [],
+            "autumn": [
+                "1.jpg", "1.png", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", 
+                "8.jpg", "9.jpg", "10.jpg", "11.jpg", "12.jpg", "13.jpg", "14.jpg", "15.jpg", 
+                "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg", "21.jpg", "22.jpg", "23.jpg", 
+                "24.jpg", "25.jpg", "26.jpg", "27.jpg", "28.jpg", "29.jpg", "30.jpg", "31.jpg", 
+                "32.jpg", "33.jpg", "34.jpg", "35.jpg", "36.jpg", "37.jpg", "38.jpg", "39.jpg", 
+                "40.jpg", "41.jpg", "42.jpg", "43.jpg", "44.jpg", "45.jpg"
+            ],
+            "winter": []
+        },
+        "2026": {
+            "spring": [
+                "46.jpg", "47.jpg", "48.jpg", "49.jpg"
+            ],
+            "summer": [],
+            "autumn": [],
+            "winter": []
+        },
+        "2027": {
+            "spring": [],
+            "summer": [],
+            "autumn": [],
+            "winter": []
+        }
+    };
+    let currentYear = '2025';
+    let currentSeason = 'autumn';
+
+    // 更新年份标签样式（有图片就不是empty样式）
+    function updateYearTabStatus() {
+        document.querySelectorAll('.year-tab').forEach(tab => {
+            const year = tab.dataset.year;
+            const hasImages = Object.values(imageData[year] || {}).some(arr => arr.length > 0);
+            if (hasImages) {
+                tab.classList.remove('empty');
+            } else {
+                tab.classList.add('empty');
+            }
+        });
+    }
+
+    // 加载图片配置
+    function loadImageData() {
+        fetch('images.json')
+            .then(response => response.json())
+            .then(data => {
+                imageData = data;
+                // 更新年份标签状态
+                updateYearTabStatus();
+                // 初始化渲染
+                renderMasonryGallery();
+            })
+            .catch(error => {
+                console.error('加载图片配置失败，使用内置默认数据:', error);
+                // 加载失败也能正常显示初始内容（内置默认已经包含了2025autumn）
+                updateYearTabStatus();
+                renderMasonryGallery();
+            });
+    }
+
+    // 季节对应表情
+    const seasonEmojis = {
+        'spring': ['🌸', '💮', '🌷', '🌹'],
+        'summer': ['🪷', '☀️', '🌿', '🍉'],
+        'autumn': ['🍂', '🍁', '🌰', '🍄'],
+        'winter': ['❄️', '⛄', '🎄', '☃️']
+    };
+
+    // 创建季节飘落特效
+    function createSeasonFalling() {
+        const container = document.getElementById('seasonFallingContainer');
+        container.innerHTML = '';
+        
+        const emojis = seasonEmojis[currentSeason];
+        // 创建 20-30 个飘落元素
+        const numItems = Math.floor(Math.random() * 11) + 20;
+        
+        for (let i = 0; i < numItems; i++) {
+            setTimeout(() => {
+                const item = document.createElement('div');
+                item.className = 'season-falling-item';
+                item.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                item.style.left = Math.random() * 100 + '%';
+                item.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                const duration = Math.random() * 3 + 3;
+                item.style.animationDuration = duration + 's';
+                
+                container.appendChild(item);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (item.parentNode) {
+                        item.parentNode.removeChild(item);
+                    }
+                }, duration * 1000);
+            }, i * 100);
+        }
+    }
+
+    // 渲染瀑布流根据选中的年份季节
+    function renderMasonryGallery() {
+        const gallery = document.getElementById('masonryGallery');
+        // 添加翻页动画类
+        gallery.classList.add('fade-turn');
+        
+        setTimeout(() => {
+            gallery.innerHTML = '';
+            
+            const images = imageData[currentYear][currentSeason];
+            
+            if (images.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-message';
+                emptyDiv.innerHTML = '💌 故事还在继续，期待未来更多美好回忆...';
+                gallery.appendChild(emptyDiv);
+            } else {
+                images.forEach(imgName => {
+                    const item = document.createElement('div');
+                    item.className = 'masonry-item';
+                    const img = document.createElement('img');
+                    img.src = `new-images/${currentYear}/${currentSeason}/${imgName}`;
+                    img.alt = '我们的回忆';
+                    item.appendChild(img);
+                    gallery.appendChild(item);
+                });
+            }
+            
+            // 移除动画类，准备下次触发
+            setTimeout(() => {
+                gallery.classList.remove('fade-turn');
+            }, 600);
+            
+            // 触发季节飘落特效
+            createSeasonFalling();
+        }, 200);
+    }
+
+    // 初始化筛选事件
+    function initFilter() {
+        // 年份切换
+        document.querySelectorAll('.year-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 如果这个年份一张图片都没有，不能点击（重新判断，保证使用最新的imageData）
+                const year = this.dataset.year;
+                const hasImages = Object.values(imageData[year] || {}).some(arr => arr.length > 0);
+                if (!hasImages) {
+                    return;
+                }
+                document.querySelector('.year-tab.active').classList.remove('active');
+                this.classList.add('active');
+                currentYear = this.dataset.year;
+                // 自动根据当前时间选择季节
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                let season;
+                if (month >= 3 && month <= 5) season = 'spring';
+                else if (month >= 6 && month <= 8) season = 'summer';
+                else if (month >= 9 && month <= 11) season = 'autumn';
+                else season = 'winter';
+                currentSeason = season;
+                document.querySelectorAll('.season-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.season === season) {
+                        btn.classList.add('active');
+                    }
+                });
+                renderMasonryGallery();
+            });
+        });
+
+        // 季节切换
+        document.querySelectorAll('.season-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelector('.season-btn.active').classList.remove('active');
+                this.classList.add('active');
+                currentSeason = this.dataset.season;
+                renderMasonryGallery();
+            });
+        });
+    }
+
+    // 访问次数统计 - 使用免费第三方visitor-badge持久化存储
+    // 数据永久保存在第三方服务器，清除浏览器缓存也不会丢失
+    function initVisitorCounter() {
+        fetch('https://visitor-badge.laobi.icu/badge?page_id=lccandsr.github.io.lovepage')
+            .then(response => response.text())
+            .then(text => {
+                // 从svg中提取数字
+                const match = text.match(/(\d+) visits/);
+                if (match) {
+                    let count = parseInt(match[1]);
+                    // visitor-badge已经自动+1了，直接显示就行
+                    document.getElementById('visitorCount').innerText = count;
+                }
+            })
+            .catch(error => {
+                console.error('获取访问统计失败，降级到localStorage:', error);
+                // 降级方案：localStorage
+                let count = localStorage.getItem('visitorCount');
+                if (!count) {
+                    count = 1;
+                } else {
+                    count = parseInt(count) + 1;
+                }
+                localStorage.setItem('visitorCount', count);
+                document.getElementById('visitorCount').innerText = count;
+                loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
+                updateLoveCount();
+            });
+    }
+
+    // 爱你的按钮 - 点击特效
+    const emojis = ['❤️', '💖', '💗', '🌟', '⭐', '✨', '🌸', '💮', '🌹'];
+    let loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
+
+    function createFallingEffect() {
+        const container = document.getElementById('fallingContainer');
+        // 每次点击产生 10-20 个随机飘落元素
+        const numItems = Math.floor(Math.random() * 11) + 10;
+        
+        for (let i = 0; i < numItems; i++) {
+            setTimeout(() => {
+                const item = document.createElement('div');
+                item.className = 'falling-item';
+                item.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                item.style.left = Math.random() * 100 + '%';
+                item.style.fontSize = (Math.random() * 20 + 16) + 'px';
+                const duration = Math.random() * 3 + 2;
+                item.style.animationDuration = duration + 's';
+                
+                container.appendChild(item);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (item.parentNode) {
+                        item.parentNode.removeChild(item);
+                    }
+                }, duration * 1000);
+            }, i * 80);
+        }
+    }
+
+    function updateLoveCount() {
+        document.getElementById('loveCount').innerText = loveCount;
+        localStorage.setItem('loveCount', loveCount);
+        
+        // 尝试同步到counter.json文件，需要后端支持，如果失败不影响使用
+        // 如果部署在GitHub Pages，可以通过GitHub API定期保存
+        fetch('/update-love-count', {
+            method: 'POST',
+            body: JSON.stringify({count: loveCount})
+        }).catch(() => {
+            // 忽略错误，已经保存在localStorage了
+        });
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        initFilter();
+        updateYearTabStatus(); // 初始加载时就更新年份标签样式
+        renderMasonryGallery(); // 先用默认数据渲染，保证一开始就能看到照片
+        loadImageData();
+        initVisitorCounter(); // 使用第三方持久化统计访问次数
+        updateLoveCount();
+        
+        document.getElementById('loveButton').addEventListener('click', function() {
+            loveCount++;
+            updateLoveCount();
+            createFallingEffect();
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+        
+        // 情侣动画交互（添加空判断，避免报错阻塞）
+        const coupleAnim = document.querySelector('.couple-animation');
+        if (coupleAnim) {
+            coupleAnim.addEventListener('click', () => {
+                const heart = document.querySelector('.heart');
+                if (heart) {
+                    heart.style.animation = 'heartExplosion 0.8s';
+                    setTimeout(() => {
+                        heart.style.animation = 'heartbeat 1.2s infinite';
+                    }, 800);
+                }
+            });
+        }
+    });
+
+    // 新增心跳爆炸动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes heartExplosion {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(5); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // ========== 我想说 - 弹幕功能 ==========
+    // 拖尾特效类型
+    const trailTypes = ['❤️', '💖', '🌟', '⭐', '🌸', '💮'];
+    
+    // 从danmaku.json加载留言（持久化保存在项目文件中）
+    let danmakuMessages = [
+        '梁小闯爱佘小蕊',
+        '要一直一直在一起',
+        '未来可期'
+    ];
+    
+    // 页面加载时从danmaku.json加载最新弹幕
+    function loadDanmakuFromFile() {
+        fetch('danmaku.json')
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    danmakuMessages = data;
+                    localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+                }
+            })
+            .catch(error => {
+                console.error('从danmaku.json加载弹幕失败，使用localStorage:', error);
+                const localData = localStorage.getItem('danmakuMessages');
+                if (localData) {
+                    danmakuMessages = JSON.parse(localData);
+                }
+            });
+    }
+
+    // 创建弹幕
+    function createDanmaku(text, isNew = false) {
+        const container = document.getElementById('danmakuContainer');
+        const item = document.createElement('div');
+        item.className = 'danmaku-item';
+        item.innerText = text;
+        
+        // 随机颜色
+        const colors = ['#ff3366', '#ff6699', '#ff99cc', '#ff3399', '#ff6b6b', '#ff0000', '#ff6600', '#ff9933', '#ffcc00'];
+        item.style.color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // 随机字体大小 - 新增弹幕固定大号，循环弹幕随机大小20px~32px
+        if (isNew) {
+            item.style.fontSize = '36px';
+            item.style.fontWeight = 'bold';
+        } else {
+            const fontSize = Math.floor(Math.random() * 13) + 20; // 20~32px
+            item.style.fontSize = fontSize + 'px';
+        }
+        
+        // 随机垂直位置 (在弹幕区域内分散，预留上下padding避免被遮挡)
+        const topPos = 10 + Math.random() * 70; // 上下各留10%空间
+        item.style.top = topPos + '%';
+        
+        // 随机速度 (8-18秒)，不快不慢，不会太挤也不会太慢
+        const duration = (Math.random() * 10 + 8);
+        item.style.animationDuration = duration + 's';
+        
+        container.appendChild(item);
+        
+        // 创建拖尾特效
+        let charIndex = 0;
+        const trailInterval = setInterval(() => {
+            if (charIndex >= text.length) {
+                clearInterval(trailInterval);
+                return;
+            }
+            // 在弹幕当前位置创建拖尾
+            const rect = item.getBoundingClient();
+            const containerRect = container.getBoundingClientRect();
+            const currentX = rect.left - containerRect.left + (charIndex * 16);
+            const currentY = rect.top - containerRect.top + (rect.height / 2);
+            
+            const trail = document.createElement('div');
+            trail.className = 'trail-item';
+            trail.innerText = trailTypes[Math.floor(Math.random() * trailTypes.length)];
+            trail.style.left = currentX + 'px';
+            trail.style.top = currentY + 'px';
+            container.appendChild(trail);
+            
+            setTimeout(() => {
+                if (trail.parentNode) trail.parentNode.removeChild(trail);
+            }, 1000);
+            
+            charIndex++;
+        }, 100);
+        
+        // 动画结束移除
+        setTimeout(() => {
+            if (item.parentNode) item.parentNode.removeChild(item);
+        }, duration * 1000);
+    }
+
+    // 循环播放弹幕
+    function startDanmakuLoop() {
+        if (danmakuMessages.length === 0) return;
+        
+        let index = 0;
+        function nextDanmaku() {
+            createDanmaku(danmakuMessages[index]);
+            index = (index + 1) % danmakuMessages.length;
+            // 间隔 5-8 秒发送下一条，避免拥挤
+            setTimeout(nextDanmaku, (Math.random() * 3 + 5) * 1000);
+        }
+        nextDanmaku();
+    }
+
+    // 打开关闭弹窗
+    function toggleModal() {
+        const overlay = document.getElementById('speakModalOverlay');
+        overlay.classList.toggle('show');
+        if (overlay.classList.contains('show')) {
+            document.getElementById('speakInput').focus();
+        }
+    }
+
+    // 提交留言
+    function submitSpeak() {
+        const input = document.getElementById('speakInput');
+        let text = input.value.trim();
+        if (!text) return;
+        
+        // 加上当前时间，精确到分钟
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        const timeStr = `${year}-${month}-${day} ${hour}:${minute}`;
+        text = `${text} [${timeStr}]`;
+        
+        danmakuMessages.push(text);
+        localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+        // 提交后立即让这条弹幕飘出来，新增弹幕固定大号突出显示
+        createDanmaku(text, true);
+        input.value = '';
+        toggleModal();
+    }
+
+    // 初始化弹幕和按钮事件
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDanmakuFromFile(); // 从danmaku.json加载持久化弹幕
+        setTimeout(() => {
+            startDanmakuLoop();
+        }, 100);
+        
+        document.getElementById('speakFab').addEventListener('click', toggleModal);
+        document.getElementById('speakModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) toggleModal();
+        });
+        document.getElementById('btnCancel').addEventListener('click', toggleModal);
+        document.getElementById('btnSubmit').addEventListener('click', submitSpeak);
+    });
+
+</script>
+
+<!-- 我想说悬浮按钮 -->
+<div class="speak-fab" id="speakFab">我想说</div>
+
+<!-- 留言弹窗 -->
+<div class="modal-overlay" id="speakModalOverlay">
+    <div class="speak-modal">
+        <div class="modal-title">💌 写下你想说的话</div>
+        <textarea class="speak-input" id="speakInput" placeholder="写下你的心里话，会变成弹幕飘过..."></textarea>
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" id="btnCancel">取消</button>
+            <button class="modal-btn btn-submit" id="btnSubmit">发送</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
