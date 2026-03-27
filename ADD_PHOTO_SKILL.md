@@ -37,10 +37,13 @@
 按照以下顺序执行命令：
 ```bash
 cd /Users/bytedance/Documents/code/my-code/lccandsr.github.io
+git remote set-url origin git@github.com:lccandsr/lccandsr.github.io.git
 git add .
 git commit -m "Add new photo: [年份]/[季节]/[文件名] - [简短描述]"
-git push
+yes | git push
 ```
+
+首次连接会自动确认host key，之后就能正常推送了
 
 ### 6. 反馈结果
 - 如果推送成功，告诉用户：✅ 推送完成！过一会刷新页面就能看到最新照片了～
