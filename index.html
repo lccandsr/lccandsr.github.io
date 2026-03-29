@@ -919,21 +919,31 @@
         });
     }
 
-    // ========== 使用免费 jsonblob 实现全局持久化存储 ==========
-    // 免费、无需配置、开箱即用，所有数据存在jsonblob，全平台同步
-    // 创建了两个blob，一个存计数，一个存弹幕
-    
-    // 你的jsonblob ID（我已经帮你创建好了）
-    const JSONBLOB_COUNTER = "https://jsonblob.com/api/jsonBlob/67e7d680-1c6b-11ef-b36e-1b70a77a0c61";
-    const JSONBLOB_DANMAKU = "https://jsonblob.com/api/jsonBlob/67e7f4a0-1c6b-11ef-b36e-39126a54f3e1";
+    // ========== 使用 GitHub API + 免费 CORS 代理 实现全局持久化存储 ==========
+    // 数据直接保存在你仓库的 counter.json 和 danmaku.json，免费稳定，全平台同步
+    // 使用 CORS Anywhere 免费代理解决跨域问题，不需要你自己搭建任何服务
 
-    // 访问次数统计 - 从jsonblob获取，全局同步
+    // 你的 GitHub 信息
+    const GITHUB = {
+        owner: 'lccandsr',
+        repo: 'lccandsr.github.io',
+        branch: 'main',
+        // 使用免费公共CORS代理
+        corsProxy: 'https://api.allorigins.win/raw?url=',
+        corsWriteProxy: 'https://cors-anywhere.herokuapp.com/'
+    };
+
+    // 访问次数统计 - 从你的仓库counter.json获取，全局同步
     let visitorCount = 0;
     let loveCount = 0;
 
+    // 初始化计数，从GitHub加载
     function initCounter() {
-        // 从jsonblob加载最新计数
-        fetch(JSONBLOB_COUNTER + '?t=' + Date.now())
+        // 通过CORS代理获取counter.json
+        const url = GITHUB.corsProxy + 
+            encodeURIComponent(`https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/counter.json?t=${Date.now()}`);
+        
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 visitorCount = data.visitors || 0;
@@ -942,11 +952,11 @@
                 visitorCount++;
                 document.getElementById('visitorCount').innerText = visitorCount;
                 document.getElementById('loveCount').innerText = loveCount;
-                // 保存新计数到jsonblob
+                // 保存新计数回GitHub
                 saveCounter();
             })
             .catch(error => {
-                console.error('从jsonblob加载计数失败，降级到localStorage:', error);
+                console.error('从GitHub加载计数失败，降级到localStorage:', error);
                 visitorCount = parseInt(localStorage.getItem('visitorCount')) || 0;
                 visitorCount++;
                 loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
@@ -957,28 +967,62 @@
             });
     }
 
-    // 保存计数到jsonblob
+    // 获取文件SHA，然后更新文件
     function saveCounter() {
-        const data = {visitors: visitorCount, loveCount: loveCount};
-        fetch(JSONBLOB_COUNTER, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('计数保存成功:', result);
-            // 同时保存到localStorage做降级
-            localStorage.setItem('visitorCount', visitorCount);
-            localStorage.setItem('loveCount', loveCount);
-        })
-        .catch(err => {
-            console.error('保存计数失败:', err);
-            localStorage.setItem('visitorCount', visitorCount);
-            localStorage.setItem('loveCount', loveCount);
-        });
+        const content = JSON.stringify({visitors: visitorCount, loveCount: loveCount}, null, 2);
+        updateGithubFile('counter.json', content, `update counter: ${visitorCount} visits, ${loveCount} loves`);
+    }
+
+    // 获取文件SHA，然后更新到GitHub
+    function updateGithubFile(filename, content, commitMessage) {
+        // 先获取文件的当前SHA
+        const apiUrl = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${filename}`;
+        const proxyUrl = GITHUB.corsProxy + encodeURIComponent(apiUrl);
+        
+        fetch(proxyUrl)
+            .then(res => res.json())
+            .then(data => {
+                const sha = data.sha;
+                const base64Content = btoa(unescape(encodeURIComponent(content)));
+                
+                // 需要你生成一个GitHub Personal Access Token，放在这里
+                // 生成方法：GitHub Settings → Developer settings → Personal access tokens → 勾选 repo 权限
+                // 把token复制到下面 GITHUB_TOKEN 变量：
+                const GITHUB_TOKEN = "替换成你的GitHub Token";
+                
+                const body = JSON.stringify({
+                    message: commitMessage,
+                    content: base64Content,
+                    sha: sha,
+                    branch: GITHUB.branch
+                });
+                
+                // 通过CORS代理更新
+                fetch(GITHUB.corsWriteProxy + `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${filename}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                })
+                .then(res => res.json())
+                .then(result => {
+                    console.log('GitHub更新成功:', result);
+                    localStorage.setItem('visitorCount', visitorCount);
+                    localStorage.setItem('loveCount', loveCount);
+                })
+                .catch(err => {
+                    console.error('GitHub更新失败:', err);
+                    localStorage.setItem('visitorCount', visitorCount);
+                    localStorage.setItem('loveCount', loveCount);
+                });
+            })
+            .catch(err => {
+                console.error('获取文件SHA失败:', err);
+                localStorage.setItem('visitorCount', visitorCount);
+                localStorage.setItem('loveCount', loveCount);
+            });
     }
 
     // 访问次数统计初始化
@@ -1077,9 +1121,12 @@
         '未来可期'
     ];
     
-    // 页面加载时从jsonblob加载最新弹幕
+    // 页面加载时从GitHub仓库加载最新弹幕
     function loadDanmakuFromFile() {
-        fetch(JSONBLOB_DANMAKU + '?t=' + Date.now())
+        const url = GITHUB.corsProxy + 
+            encodeURIComponent(`https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/danmaku.json?t=${Date.now()}`);
+        
+        fetch(url)
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
@@ -1088,7 +1135,7 @@
                 }
             })
             .catch(error => {
-                console.error('从jsonblob加载弹幕失败，降级到localStorage:', error);
+                console.error('从GitHub加载弹幕失败，降级到localStorage:', error);
                 const localData = localStorage.getItem('danmakuMessages');
                 if (localData) {
                     danmakuMessages = JSON.parse(localData);
@@ -1096,28 +1143,10 @@
             });
     }
 
-    // 保存弹幕到jsonblob
+    // 保存弹幕到GitHub仓库的danmaku.json
     function saveDanmakuToGithub() {
-        saveDanmaku();
-    }
-
-    function saveDanmaku() {
-        fetch(JSONBLOB_DANMAKU, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(danmakuMessages)
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('弹幕保存成功:', result);
-            localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
-        })
-        .catch(err => {
-            console.error('保存弹幕失败:', err);
-            localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
-        });
+        const content = JSON.stringify(danmakuMessages, null, 2);
+        updateGithubFile('danmaku.json', content, `add new danmaku, total ${danmakuMessages.length}`);
     }
 
     // 创建弹幕
