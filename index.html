@@ -973,56 +973,28 @@
         updateGithubFile('counter.json', content, `update counter: ${visitorCount} visits, ${loveCount} loves`);
     }
 
-    // 获取文件SHA，然后更新到GitHub
+    // 更新GitHub上的文件内容 - 通过Cloudflare Worker代理（保护token不泄露）
+    // 部署worker后把WORKER_URL改成你自己的地址
+    // Token放在Worker里，不会暴露在前端代码中，更安全
+    const WORKER_URL = "https://love-update-proxy.<你的用户名>.workers.dev/";
+    
     function updateGithubFile(filename, content, commitMessage) {
-        // 先获取文件的当前SHA
-        const apiUrl = `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${filename}`;
-        const proxyUrl = GITHUB.corsProxy + encodeURIComponent(apiUrl);
-        
-        fetch(proxyUrl)
-            .then(res => res.json())
-            .then(data => {
-                const sha = data.sha;
-                const base64Content = btoa(unescape(encodeURIComponent(content)));
-                
-                // 需要你生成一个GitHub Personal Access Token，放在这里
-                // 生成方法：GitHub Settings → Developer settings → Personal access tokens → 勾选 repo 权限
-                // 把token复制到下面 GITHUB_TOKEN 变量：
-                const GITHUB_TOKEN = "替换成你的GitHub Token";
-                
-                const body = JSON.stringify({
-                    message: commitMessage,
-                    content: base64Content,
-                    sha: sha,
-                    branch: GITHUB.branch
-                });
-                
-                // 通过CORS代理更新
-                fetch(GITHUB.corsWriteProxy + `https://api.github.com/repos/${GITHUB.owner}/${GITHUB.repo}/contents/${filename}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: body
-                })
-                .then(res => res.json())
-                .then(result => {
-                    console.log('GitHub更新成功:', result);
-                    localStorage.setItem('visitorCount', visitorCount);
-                    localStorage.setItem('loveCount', loveCount);
-                })
-                .catch(err => {
-                    console.error('GitHub更新失败:', err);
-                    localStorage.setItem('visitorCount', visitorCount);
-                    localStorage.setItem('loveCount', loveCount);
-                });
-            })
-            .catch(err => {
-                console.error('获取文件SHA失败:', err);
-                localStorage.setItem('visitorCount', visitorCount);
-                localStorage.setItem('loveCount', loveCount);
-            });
+        fetch(WORKER_URL + filename, {
+            method: 'POST',
+            body: content
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('文件更新成功:', result);
+            localStorage.setItem('visitorCount', visitorCount);
+            localStorage.setItem('loveCount', loveCount);
+        })
+        .catch(err => {
+            console.error('更新失败，检查Worker配置:', err);
+            // 更新失败也没关系，已经保存在localStorage了，下次再同步
+            localStorage.setItem('visitorCount', visitorCount);
+            localStorage.setItem('loveCount', loveCount);
+        });
     }
 
     // 访问次数统计初始化
