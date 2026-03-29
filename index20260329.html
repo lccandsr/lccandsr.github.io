@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>lcc❤sr</title>
+		<script type="text/javascript" src="https://cdn.staticfile.org/jquery/1.12.4/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
+		<script src="https://www.layuicdn.com/layui/layui.js"></script>
+		<script type="text/javascript" src="canvas_bg.js"></script>
+		<style>
+			* {
+				cursor: pointer;
+			}
+
+			body {
+				background-color: beige;
+			}
+
+			#div1 {
+				text-align: center;
+				position: relative;
+				top: 55px;
+			}
+
+			.loveName {
+				color: red;
+				font-weight: bold;
+				font-size: 55px;
+				height: 120px;
+			}
+
+			.lTime {
+				/* width: 35%; */
+				margin: 0 auto;
+				text-align: center;
+				font-size: 30px;
+				color: #0FCECE;
+			}
+
+			#author {
+				position: absolute;
+				left: 75%;
+				top: 75%;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="c" style="position: absolute;z-index: -1;text-align: center;top: -20px;left: -20px;"></canvas>
+		<div id="div1">
+			<div class="loveName">梁小闯👦❤佘小蕊👧</div>
+		</div>
+        <button class="musicBtn  ">
+            <i class="layui-icon layui-icon-headset layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 28px;position: fixed;left: 51px;top: 100px;"></i>
+        </button>
+        <audio autoplay="autoplay" loop class="audio1">
+            <source src="./music/qianshou.mp3" type="audio/mpeg">
+        </audio>
+        <script>
+            const musicBtn = document.querySelector('.musicBtn');
+            const audio = document.querySelector('.audio1');
+            musicBtn.addEventListener('click', function () {
+                if (audio.paused) {
+                    audio.play();
+                } else {
+                    audio.pause();
+                }
+            });
+        </script>
+
+		<!-- 在原有body结束前添加以下代码 -->
+        <!-- 在body标签内添加以下内容 -->
+        <div class="love-clock">
+            <div class="clock-title">憨宝宝，距离我们在一起2024年10月26日00:14已经共同走过</div>
+            <div class="time-container">
+                <div class="time-block">
+                    <span class="number" id="loveDays">0</span>
+                    <span class="label">天</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveHours">0</span>
+                    <span class="label">小时</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveMinutes">0</span>
+                    <span class="label">分钟</span>
+                </div>
+                <div class="time-block">
+                    <span class="number" id="loveSeconds">0</span>
+                    <span class="label">秒</span>
+                </div>
+            </div>
+            <div class="memory-moment">
+                我们的故事开始于2024年9月9日 18:35 <br>
+            </div>
+        </div>
+        
+        <style>
+        /* 添加在原有style中 */
+        .love-clock {
+            position: relative;
+            margin: 100px auto;
+            padding: 30px;
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255,100,100,0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+        
+        .clock-title {
+            font-size: 28px;
+            color: #750002;
+            text-shadow: 2px 2px 4px rgba(255,50,50,0.8);
+            margin-bottom: 25px;
+            font-family: '楷体', cursive;
+        }
+        
+        .time-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .time-block {
+            position: relative;
+            min-width: 120px;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff3366, #ff6699);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(255,50,50,0.3);
+        }
+        
+        .number {
+            display: block;
+            font-size: 48px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+        
+        .label {
+            font-size: 18px;
+            color: rgba(2, 48, 51, 0.9);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .memory-moment {
+            margin-top: 25px;
+            font-size: 20px;
+            color: #121212;
+            line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(255,50,50,0.5);
+        }
+        </style>
+        
+        <script>
+        // 添加在原有script中
+        function updateLoveTime() {
+            const startDate = new Date(2024, 9, 26, 0, 14); // 月份从0开始计算
+            const now = new Date();
+            const diff = now - startDate;
+        
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+            // 数字动画效果
+            animateNumber('loveDays', days);
+            animateNumber('loveHours', hours);
+            animateNumber('loveMinutes', minutes);
+            animateNumber('loveSeconds', seconds);
+        }
+        
+        function animateNumber(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const current = parseInt(element.innerText) || 0;
+            if (current === newValue) return;
+            
+            element.style.transform = 'scale(1.2)';
+            element.style.color = '#ffeb3b';
+            setTimeout(() => {
+                element.innerText = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.color = '#fff';
+            }, 200);
+        }
+        
+        // 每秒更新时间
+        setInterval(updateLoveTime, 1000);
+        updateLoveTime(); // 立即执行一次
+        </script>
+<div class="couple-animation">
+    <div class="boy"></div>
+    <div class="heart"></div>
+    <div class="girl"></div>
+</div>
+
+<div class="photo-wall">
+    <div class="photos">
+        <img src="images/gallery/1.png" alt="我们的回忆">
+        <img src="images/gallery/2.jpg" alt="美好时光">
+        <img src="images/gallery/42.jpg" alt="美好时光">
+        <img src="images/gallery/43.jpg" alt="美好时光">
+        <img src="images/gallery/3.jpg" alt="幸福瞬间">
+        <img src="images/gallery/4.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/5.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/6.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/7.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/8.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/9.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/10.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/11.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/12.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/13.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/14.jpg" alt="幸福瞬间">
+        <img src="images/gallery/15.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/16.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/17.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/18.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/19.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/20.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/21.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/22.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/23.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/24.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/25.jpg" alt="幸福瞬间">
+        <img src="images/gallery/26.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/27.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/28.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/29.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/30.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/31.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/32.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/33.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/34.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/35.jpg" alt="幸福瞬间">
+        <img src="images/gallery/36.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/37.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/38.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/39.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/40.jpg" alt="甜蜜时刻">
+        <img src="images/gallery/41.jpg" alt="甜蜜时刻">
+    </div>
+</div>
+
+<style>
+/* 新增样式 */
+/* 情侣动画 */
+.couple-animation {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+}
+
+.boy, .girl {
+    width: 80px;
+    height: 120px;
+    background-size: contain;
+    animation: float 3s ease-in-out infinite;
+}
+
+.boy {
+    background: url('images/boy.png') no-repeat;
+    animation-delay: 0.2s;
+}
+
+.girl {
+    background: url('images/girl.png') no-repeat;
+    animation-delay: 0.5s;
+}
+
+.heart {
+    width: 40px;
+    height: 40px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff3366" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+    animation: heartbeat 1.2s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+
+/* 照片墙 */
+.photo-wall {
+    position: relative;
+    margin: 50px auto;
+    width: 80%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(255,50,50,0.2);
+}
+
+.photos {
+    display: flex;
+    width: 400%;
+    height: 100%;
+    animation: slide 20s infinite;
+}
+
+.photos:hover {
+    animation-play-state: paused;
+}
+
+.photos img {
+    width: 25%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.photos img:hover {
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+@keyframes slide {
+    0%, 20% { transform: translateX(0); }
+    25%, 45% { transform: translateX(-25%); }
+    50%, 70% { transform: translateX(-50%); }
+    75%, 95% { transform: translateX(-75%); }
+    100% { transform: translateX(0); }
+}
+</style>
+
+<script>
+
+// 照片墙自动轮播增强
+function initPhotoWall() {
+    const photos = document.querySelector('.photos');
+    let clone = photos.cloneNode(true);
+    photos.parentNode.appendChild(clone);
+    photos.style.width = '200%';
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+    initPhotoWall();
+    
+    // 情侣动画交互
+    document.querySelector('.couple-animation').addEventListener('click', () => {
+        document.querySelector('.heart').style.animation = 'heartExplosion 0.8s';
+        setTimeout(() => {
+            document.querySelector('.heart').style.animation = 'heartbeat 1.2s infinite';
+        }, 800);
+    });
+});
+
+// 新增心跳爆炸动画
+const style = document.createElement('style');
+style.textContent = `
+@keyframes heartExplosion {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(5); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+</script>
+	</body>
+</html>
