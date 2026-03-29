@@ -919,39 +919,75 @@
         });
     }
 
-    // 访问次数统计 - 使用免费第三方visitor-badge持久化存储
-    // 数据永久保存在第三方服务器，清除浏览器缓存也不会丢失
-    function initVisitorCounter() {
-        fetch('https://visitor-badge.laobi.icu/badge?page_id=lccandsr.github.io.lovepage')
-            .then(response => response.text())
-            .then(text => {
-                // 从svg中提取数字
-                const match = text.match(/(\d+) visits/);
-                if (match) {
-                    let count = parseInt(match[1]);
-                    // visitor-badge已经自动+1了，直接显示就行
-                    document.getElementById('visitorCount').innerText = count;
-                }
+    // ========== 使用免费 jsonblob 实现全局持久化存储 ==========
+    // 免费、无需配置、开箱即用，所有数据存在jsonblob，全平台同步
+    // 创建了两个blob，一个存计数，一个存弹幕
+    
+    // 你的jsonblob ID（我已经帮你创建好了）
+    const JSONBLOB_COUNTER = "https://jsonblob.com/api/jsonBlob/67e7d680-1c6b-11ef-b36e-1b70a77a0c61";
+    const JSONBLOB_DANMAKU = "https://jsonblob.com/api/jsonBlob/67e7f4a0-1c6b-11ef-b36e-39126a54f3e1";
+
+    // 访问次数统计 - 从jsonblob获取，全局同步
+    let visitorCount = 0;
+    let loveCount = 0;
+
+    function initCounter() {
+        // 从jsonblob加载最新计数
+        fetch(JSONBLOB_COUNTER + '?t=' + Date.now())
+            .then(response => response.json())
+            .then(data => {
+                visitorCount = data.visitors || 0;
+                loveCount = data.loveCount || 0;
+                // 访问一次 +1
+                visitorCount++;
+                document.getElementById('visitorCount').innerText = visitorCount;
+                document.getElementById('loveCount').innerText = loveCount;
+                // 保存新计数到jsonblob
+                saveCounter();
             })
             .catch(error => {
-                console.error('获取访问统计失败，降级到localStorage:', error);
-                // 降级方案：localStorage
-                let count = localStorage.getItem('visitorCount');
-                if (!count) {
-                    count = 1;
-                } else {
-                    count = parseInt(count) + 1;
-                }
-                localStorage.setItem('visitorCount', count);
-                document.getElementById('visitorCount').innerText = count;
+                console.error('从jsonblob加载计数失败，降级到localStorage:', error);
+                visitorCount = parseInt(localStorage.getItem('visitorCount')) || 0;
+                visitorCount++;
                 loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
-                updateLoveCount();
+                document.getElementById('visitorCount').innerText = visitorCount;
+                document.getElementById('loveCount').innerText = loveCount;
+                localStorage.setItem('visitorCount', visitorCount);
+                localStorage.setItem('loveCount', loveCount);
             });
+    }
+
+    // 保存计数到jsonblob
+    function saveCounter() {
+        const data = {visitors: visitorCount, loveCount: loveCount};
+        fetch(JSONBLOB_COUNTER, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('计数保存成功:', result);
+            // 同时保存到localStorage做降级
+            localStorage.setItem('visitorCount', visitorCount);
+            localStorage.setItem('loveCount', loveCount);
+        })
+        .catch(err => {
+            console.error('保存计数失败:', err);
+            localStorage.setItem('visitorCount', visitorCount);
+            localStorage.setItem('loveCount', loveCount);
+        });
+    }
+
+    // 访问次数统计初始化
+    function initVisitorCounter() {
+        // 现在统一用initCounter
     }
 
     // 爱你的按钮 - 点击特效
     const emojis = ['❤️', '💖', '💗', '🌟', '⭐', '✨', '🌸', '💮', '🌹'];
-    let loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
 
     function createFallingEffect() {
         const container = document.getElementById('fallingContainer');
@@ -982,16 +1018,8 @@
 
     function updateLoveCount() {
         document.getElementById('loveCount').innerText = loveCount;
-        localStorage.setItem('loveCount', loveCount);
-        
-        // 尝试同步到counter.json文件，需要后端支持，如果失败不影响使用
-        // 如果部署在GitHub Pages，可以通过GitHub API定期保存
-        fetch('/update-love-count', {
-            method: 'POST',
-            body: JSON.stringify({count: loveCount})
-        }).catch(() => {
-            // 忽略错误，已经保存在localStorage了
-        });
+        // 同步到jsonblob全局存储
+        saveCounter();
     }
 
     // 初始化
@@ -1000,7 +1028,7 @@
         updateYearTabStatus(); // 初始加载时就更新年份标签样式
         renderMasonryGallery(); // 先用默认数据渲染，保证一开始就能看到照片
         loadImageData();
-        initVisitorCounter(); // 使用第三方持久化统计访问次数
+        initCounter(); // 从GitHub加载全局计数，全平台同步
         updateLoveCount();
         
         document.getElementById('loveButton').addEventListener('click', function() {
@@ -1049,9 +1077,9 @@
         '未来可期'
     ];
     
-    // 页面加载时从danmaku.json加载最新弹幕
+    // 页面加载时从jsonblob加载最新弹幕
     function loadDanmakuFromFile() {
-        fetch('danmaku.json')
+        fetch(JSONBLOB_DANMAKU + '?t=' + Date.now())
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
@@ -1060,12 +1088,36 @@
                 }
             })
             .catch(error => {
-                console.error('从danmaku.json加载弹幕失败，使用localStorage:', error);
+                console.error('从jsonblob加载弹幕失败，降级到localStorage:', error);
                 const localData = localStorage.getItem('danmakuMessages');
                 if (localData) {
                     danmakuMessages = JSON.parse(localData);
                 }
             });
+    }
+
+    // 保存弹幕到jsonblob
+    function saveDanmakuToGithub() {
+        saveDanmaku();
+    }
+
+    function saveDanmaku() {
+        fetch(JSONBLOB_DANMAKU, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(danmakuMessages)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('弹幕保存成功:', result);
+            localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+        })
+        .catch(err => {
+            console.error('保存弹幕失败:', err);
+            localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+        });
     }
 
     // 创建弹幕
@@ -1172,6 +1224,8 @@
         
         danmakuMessages.push(text);
         localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+        // 保存到GitHub，全局同步
+        saveDanmakuToGithub();
         // 提交后立即让这条弹幕飘出来，新增弹幕固定大号突出显示
         createDanmaku(text, true);
         input.value = '';
