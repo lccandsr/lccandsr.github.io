@@ -937,34 +937,37 @@
     let visitorCount = 0;
     let loveCount = 0;
 
-    // 初始化计数，从GitHub加载
+    // 初始化计数，从GitHub加载 - 通过Worker读取，更可靠
     function initCounter() {
-        // 通过CORS代理获取counter.json
-        const url = GITHUB.corsProxy + 
-            encodeURIComponent(`https://raw.githubusercontent.com/${GITHUB.owner}/${GITHUB.repo}/${GITHUB.branch}/counter.json?t=${Date.now()}`);
+        // 先从localStorage读取，立即显示，避免一直显示0
+        visitorCount = parseInt(localStorage.getItem('visitorCount')) || 0;
+        loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
+        document.getElementById('visitorCount').innerText = visitorCount;
+        document.getElementById('loveCount').innerText = loveCount;
         
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                visitorCount = data.visitors || 0;
-                loveCount = data.loveCount || 0;
-                // 访问一次 +1
-                visitorCount++;
-                document.getElementById('visitorCount').innerText = visitorCount;
-                document.getElementById('loveCount').innerText = loveCount;
-                // 保存新计数回GitHub
-                saveCounter();
-            })
-            .catch(error => {
-                console.error('从GitHub加载计数失败，降级到localStorage:', error);
-                visitorCount = parseInt(localStorage.getItem('visitorCount')) || 0;
-                visitorCount++;
-                loveCount = parseInt(localStorage.getItem('loveCount')) || 0;
-                document.getElementById('visitorCount').innerText = visitorCount;
-                document.getElementById('loveCount').innerText = loveCount;
-                localStorage.setItem('visitorCount', visitorCount);
-                localStorage.setItem('loveCount', loveCount);
-            });
+        // 通过GET从Worker获取最新数据
+        fetch(`${WORKER_URL}counter.json`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            visitorCount = data.visitors || 0;
+            loveCount = data.loveCount || 0;
+            // 访问一次 +1
+            visitorCount++;
+            document.getElementById('visitorCount').innerText = visitorCount;
+            document.getElementById('loveCount').innerText = loveCount;
+            // 保存新计数回GitHub
+            saveCounter();
+        })
+        .catch(error => {
+            console.error('从Worker加载计数失败，使用localStorage数据:', error);
+            // 即使加载失败，还是要+1
+            visitorCount++;
+            document.getElementById('visitorCount').innerText = visitorCount;
+            // 保存到localStorage，下次打开会用这个数
+            saveCounter();
+        });
     }
 
     // 获取文件SHA，然后更新文件
