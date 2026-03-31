@@ -1196,10 +1196,19 @@
         function nextDanmaku() {
             createDanmaku(danmakuMessages[index]);
             index = (index + 1) % danmakuMessages.length;
-            // 间隔 5-8 秒发送下一条，避免拥挤
-            setTimeout(nextDanmaku, (Math.random() * 3 + 5) * 1000);
+            // 根据弹幕总数调整间隔，保持屏幕上有 6~20 条弹幕
+            // 每条弹幕飞行时间约 8-18 秒，间隔 2~5 秒
+            const minInterval = 2000;
+            const maxInterval = 5000;
+            setTimeout(nextDanmaku, Math.floor(Math.random() * (maxInterval - minInterval + 1)) + minInterval);
         }
-        nextDanmaku();
+        // 开局一次性发送多条，让弹幕快速填满屏幕
+        const initialCount = Math.min(8, danmakuMessages.length);
+        for (let i = 0; i < initialCount; i++) {
+            setTimeout(() => {
+                nextDanmaku();
+            }, i * 800);
+        }
     }
 
     // 打开关闭弹窗
