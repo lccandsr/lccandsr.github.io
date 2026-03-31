@@ -976,7 +976,7 @@
     // 更新GitHub上的文件内容 - 通过Cloudflare Worker代理（保护token不泄露）
     // 部署worker后把WORKER_URL改成你自己的地址
     // Token放在Worker里，不会暴露在前端代码中，更安全
-    const WORKER_URL = "https://lccandsr.1821341259.workers.dev";
+    const WORKER_URL = "https://lccandsr.1821341259.workers.dev/";
     
     function updateGithubFile(filename, content, commitMessage) {
         fetch(WORKER_URL + filename, {
