@@ -117,8 +117,8 @@
         /* 弹幕区域 */
         .danmaku-container {
             position: relative;
-            width: 90%;
-            height: 150px;
+            width: 95%;
+            height: 180px;
             margin: 30px auto;
             overflow: hidden;
             background: rgba(0,0,0,0.05);
@@ -1146,7 +1146,7 @@
         }
         
         // 随机垂直位置 (在弹幕区域内分散，预留上下padding避免被遮挡)
-        const topPos = 10 + Math.random() * 70; // 上下各留10%空间
+        const topPos = 5 + Math.random() * 90; // 上下各留5%空间，更大范围
         item.style.top = topPos + '%';
         
         // 随机速度 (8-18秒)，不快不慢，不会太挤也不会太慢
@@ -1196,18 +1196,18 @@
         function nextDanmaku() {
             createDanmaku(danmakuMessages[index]);
             index = (index + 1) % danmakuMessages.length;
-            // 根据弹幕总数调整间隔，保持屏幕上有 6~20 条弹幕
-            // 每条弹幕飞行时间约 8-18 秒，间隔 2~5 秒
-            const minInterval = 2000;
-            const maxInterval = 5000;
+            // 根据弹幕总数调整间隔，保持屏幕上有 5~15 条弹幕
+            // 每条弹幕飞行时间约 8-18 秒，间隔 3~7 秒
+            const minInterval = 3000;
+            const maxInterval = 7000;
             setTimeout(nextDanmaku, Math.floor(Math.random() * (maxInterval - minInterval + 1)) + minInterval);
         }
         // 开局一次性发送多条，让弹幕快速填满屏幕
-        const initialCount = Math.min(8, danmakuMessages.length);
+        const initialCount = Math.min(6, danmakuMessages.length);
         for (let i = 0; i < initialCount; i++) {
             setTimeout(() => {
                 nextDanmaku();
-            }, i * 800);
+            }, i * 1000);
         }
     }
 
