@@ -1104,6 +1104,7 @@
                 if (Array.isArray(data) && data.length > 0) {
                     danmakuMessages = data;
                     localStorage.setItem('danmakuMessages', JSON.stringify(danmakuMessages));
+                    console.log('从GitHub加载成功，共', danmakuMessages.length, '条弹幕');
                 }
             })
             .catch(error => {
@@ -1235,10 +1236,15 @@
 
     // 初始化弹幕和按钮事件
     document.addEventListener('DOMContentLoaded', function() {
-        loadDanmakuFromFile(); // 从danmaku.json加载持久化弹幕
-        setTimeout(() => {
-            startDanmakuLoop();
-        }, 100);
+        // 先从localStorage加载，保证立即有数据可播
+        const localData = localStorage.getItem('danmakuMessages');
+        if (localData) {
+            danmakuMessages = JSON.parse(localData);
+        }
+        // 立即开始循环播放
+        startDanmakuLoop();
+        // 异步从GitHub加载最新数据，加载完成后更新
+        loadDanmakuFromFile();
         
         document.getElementById('speakFab').addEventListener('click', toggleModal);
         document.getElementById('speakModalOverlay').addEventListener('click', function(e) {
